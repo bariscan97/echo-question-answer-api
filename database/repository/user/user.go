@@ -1,10 +1,10 @@
 package user
 
 import (
+	model "articles-api/models/user"
+	"articles-api/utils"
 	"context"
 	"fmt"
-	"articles-api/utils"
-	model "articles-api/models/user"
 	"strings"
 	"time"
 
@@ -44,8 +44,7 @@ func (userRepo *UserRepository) BlockUserById(current_userId uuid.UUID, id uuid.
 	        DELETE FROM blocking WHERE user_id = '${value1}$' AND blocking_id = '${value2}$';
 		ELSE
 			INSERT INTO blocking(user_id ,blocking_id) VALUES('${value1}$' , '${value2}$');
-			
-	    END IF;
+		END IF;
 	END $$;`
 
 	sql = strings.ReplaceAll(sql, "${value1}$", current_userId.String())
@@ -332,7 +331,7 @@ func (userRepo *UserRepository) UpdateUserById(current_userId uuid.UUID, data ma
 func (userRepo *UserRepository) GetAllUsers(current_userId *uuid.UUID, page string) ([]model.FetchUserModel, error) {
 
 	ctx := context.Background()
-	
+
 	sql := `
 		SELECT id, username, profile_img , email , followers_cnt, following_cnt ,created_at, updated_at FROM users AS u
 	`
@@ -389,7 +388,7 @@ func (userRepo *UserRepository) GetUserById(current_userId *uuid.UUID, user_id u
 			WHERE (user_id = $1 AND blocking_id = $2) OR user_id = $2 AND blocking_id = $1
 		`
 		var check bool
-		
+
 		userRepo.pool.QueryRow(context.Background(), checkQuery, current_userId, user_id).Scan(&check)
 
 		if check {
