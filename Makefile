@@ -14,9 +14,6 @@ createdb:
 dropdb:
 	@docker exec -it $(POSTGRES_CONTAINER) psql -U $(DB_USER) -c "DROP DATABASE IF EXISTS $(DB_NAME);"
 
-migrate3partclear:
-	@migrate -path ./migrations -database "postgres://$(DB_USER):$(DB_PASSWORD)@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=disable" -verbose force 3
-
 migrateup:
 	@migrate -path ./migrations -database "postgres://$(DB_USER):$(DB_PASSWORD)@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=disable" -verbose up
 
