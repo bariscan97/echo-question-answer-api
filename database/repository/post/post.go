@@ -1,12 +1,14 @@
 package post
 
 import (
-	"articles-api/utils"
 	model "articles-api/models/post"
+	"articles-api/utils"
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
@@ -172,41 +174,39 @@ func (postRepo *PostRepository) GetUserPostsById(current_userId *uuid.UUID, user
 }
 func (postRepo *PostRepository) CreateComment(current_userId uuid.UUID, parent_id uuid.UUID, data *model.CreatePostModel) (*model.FetchPostModel, error) {
 
-	checkQuery := `
-			DO $$
-			DECLARE
-				post_user_id UUID;
-			BEGIN
-				SELECT user_id INTO post_user_id FROM posts WHERE id = ${value2}$;
-				IF EXISTS (
-					SELECT 1
-					FROM blocking
-					WHERE (user_id = '${value1}$' AND blocking_id = post_user_id) OR user_id = post_user_id AND blocking_id = '${value1}$'
-				) THEN
-					RAISE NOTICE 'user cannot access this post' ;
-				END IF;
-			END $$;`
+	checkAndInsertQuery := `
+    WITH check_block AS (
+        SELECT 
+            CASE WHEN EXISTS (
+                SELECT 1
+                FROM blocking
+                WHERE (user_id = $1 AND blocking_id = p.user_id)
+                   OR (user_id = p.user_id AND blocking_id = $1)
+            )
+            THEN TRUE ELSE FALSE END AS is_blocked
+        FROM posts p WHERE p.id = $2
+    )
+    INSERT INTO posts (user_id, parent_id, title, content)
+    SELECT $1, $2, $3, $4
+    WHERE (SELECT is_blocked FROM check_block) = FALSE
+    RETURNING id, parent_id, title, content;
+    `
 
-	checkQuery = strings.ReplaceAll(checkQuery, "${value1}$", current_userId.String())
-	checkQuery = strings.ReplaceAll(checkQuery, "${value2}$", parent_id.String())
-
-	_, err := postRepo.pool.Exec(context.Background(), checkQuery)
-
-	if err != nil {
-		return &model.FetchPostModel{}, err
-	}
-
-	ctx := context.Background()
-
-	sql := `
-		INSERT INTO posts(user_id, parent_id ,title, content) VALUES($1 ,$2 ,$3 ,$4) RETURNING id, parent_id, title, content
-	`
 	var post model.FetchPostModel
 
-	err = postRepo.pool.QueryRow(ctx, sql, current_userId, parent_id, data.Title, data.Content).Scan(&post.Id, &post.Parent_id, &post.Title, &post.Content)
-
-	if err != nil {
-		return &post, err
+	if err := postRepo.pool.QueryRow(context.Background(),
+	 checkAndInsertQuery, 
+	 current_userId, parent_id, 
+	 data.Title, data.Content).
+	 Scan(&post.Id, 
+		&post.Parent_id, 
+		&post.Title, 
+		&post.Content,
+	); err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, fmt.Errorf("user cannot access this post") 
+		}
+		return nil, err
 	}
 
 	return &post, nil
