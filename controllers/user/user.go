@@ -428,15 +428,13 @@ func (controller *UserController) DeleteUserById(c echo.Context) error {
 		})
 	}
 
-	command, err := controller.UserService.DeleteMe(parsedUUID)
-
-	if err != nil {
+	if err := controller.UserService.DeleteMe(parsedUUID); err != nil {
 		return c.JSON(http.StatusInternalServerError, echo.Map{
 			"error": err.Error(),
 		})
 	}
 
 	return c.JSON(200, echo.Map{
-		"message": command,
+		"message": "delete ok",
 	})
 }

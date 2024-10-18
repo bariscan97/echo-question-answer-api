@@ -14,7 +14,7 @@ type UserService struct {
 type IUserService interface {
 	CreateUser(data *model.RegisterUserModel) (map[string]interface{}, error)
 	GetUserByEmail(email string) (*model.FetchUserModel, error)
-	DeleteMe(current_userId uuid.UUID) (string, error)
+	DeleteMe(current_userId uuid.UUID) error
     GetAllUsers(current_userId *uuid.UUID, page string) ([]model.FetchUserModel, error)
     GetUserById(current_userId *uuid.UUID, id uuid.UUID) (*model.FetchUserModel, error)
     UpdateUserById(current_userId uuid.UUID, data map[string]interface{}) error
@@ -59,7 +59,7 @@ func (userService *UserService) GetUserByEmail(email string) (*model.FetchUserMo
 	return userService.UserRepository.GetUserByEmail(email)
 }
 
-func (userService *UserService) DeleteMe(current_userId uuid.UUID) (string, error) {
+func (userService *UserService) DeleteMe(current_userId uuid.UUID) error {
 	return userService.UserRepository.DeleteMe(current_userId)
 }
 

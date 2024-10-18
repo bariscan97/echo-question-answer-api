@@ -239,9 +239,9 @@ func (postRepo *PostRepository) UpdatePostById(current_userId uuid.UUID, post_id
 		"user_id": current_userId,
 	})
 
-	_, err := postRepo.pool.Exec(ctx, sql, parameters...)
+	result, err := postRepo.pool.Exec(ctx, sql, parameters...)
 
-	if err != nil {
+	if result.RowsAffected() == 0 || err != nil {
 		return err
 	}
 
@@ -307,9 +307,9 @@ func (postRepo *PostRepository) DeletePostById(current_userId uuid.UUID, id uuid
 		DELETE FROM posts p
 		WHERE p.user_id = $1 AND p.id = $2
 	`
-	_, err := postRepo.pool.Exec(ctx, sql, current_userId, id)
+	result, err := postRepo.pool.Exec(ctx, sql, current_userId, id)
 
-	if err != nil {
+	if result.RowsAffected() == 0 || err != nil {
 		return err
 	}
 

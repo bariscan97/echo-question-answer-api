@@ -20,7 +20,7 @@ type IUserRepository interface {
 	CreateUser(data *model.RegisterUserModel) (map[string]interface{}, error)
 	GetUserByEmail(email string) (*model.FetchUserModel, error)
 	GetAllUsers(current_userId *uuid.UUID, page string) ([]model.FetchUserModel, error)
-	DeleteMe(current_userId uuid.UUID) (string, error)
+	DeleteMe(current_userId uuid.UUID) error
 	GetUserById(current_userId *uuid.UUID, user_id uuid.UUID) (*model.FetchUserModel, error)
 	UpdateUserById(current_userId uuid.UUID, data map[string]interface{}) error
 	GetMyBlockList(current_userId uuid.UUID, page string) ([]map[string]interface{}, error)
@@ -55,7 +55,7 @@ func (userRepo *UserRepository) BlockUserById(current_userId uuid.UUID, id uuid.
 	command, err := userRepo.pool.Exec(ctx, sql)
 
 	if err != nil {
-		return "", fmt.Errorf(err.Error())
+		return "", err
 	}
 
 	return command.String(), nil
@@ -78,7 +78,7 @@ func (userRepo *UserRepository) GetMyBlockList(current_userId uuid.UUID, page st
 	rows, err := userRepo.pool.Query(ctx, sql, current_userId, page)
 
 	if err != nil {
-		return []map[string]interface{}{}, fmt.Errorf(err.Error())
+		return []map[string]interface{}{}, err
 	}
 
 	defer rows.Close()
@@ -102,7 +102,7 @@ func (userRepo *UserRepository) GetMyBlockList(current_userId uuid.UUID, page st
 			&createdAt,
 			&updatedAt,
 		); err != nil {
-			return []map[string]interface{}{}, fmt.Errorf(err.Error())
+			return []map[string]interface{}{}, err
 		}
 
 		user := map[string]interface{}{
@@ -160,7 +160,7 @@ func (userRepo *UserRepository) GetUserFollowingListById(current_userId *uuid.UU
 	rows, err := userRepo.pool.Query(ctx, sql, parameters...)
 
 	if err != nil {
-		return []map[string]interface{}{}, fmt.Errorf(err.Error())
+		return []map[string]interface{}{}, err
 	}
 
 	defer rows.Close()
@@ -184,7 +184,7 @@ func (userRepo *UserRepository) GetUserFollowingListById(current_userId *uuid.UU
 			&createdAt,
 			&updatedAt,
 		); err != nil {
-			return []map[string]interface{}{}, fmt.Errorf(err.Error())
+			return []map[string]interface{}{}, err
 		}
 		user := map[string]interface{}{
 			"id":          id,
@@ -234,7 +234,7 @@ func (userRepo *UserRepository) GetUserFollowersListById(current_userId *uuid.UU
 	rows, err := userRepo.pool.Query(ctx, sql, parameters...)
 
 	if err != nil {
-		return []map[string]interface{}{}, fmt.Errorf(err.Error())
+		return []map[string]interface{}{}, err
 	}
 
 	defer rows.Close()
@@ -258,7 +258,7 @@ func (userRepo *UserRepository) GetUserFollowersListById(current_userId *uuid.UU
 			&createdAt,
 			&updatedAt,
 		); err != nil {
-			return []map[string]interface{}{}, fmt.Errorf(err.Error())
+			return []map[string]interface{}{}, err
 		}
 		user := map[string]interface{}{
 			"id":          id,
@@ -305,7 +305,7 @@ func (userRepo *UserRepository) FollowUserById(current_userId uuid.UUID, user_id
 	command, err := userRepo.pool.Exec(ctx, sql)
 
 	if err != nil {
-		return "", fmt.Errorf(err.Error())
+		return "", err
 	}
 
 	return command.String(), nil
@@ -319,10 +319,10 @@ func (userRepo *UserRepository) UpdateUserById(current_userId uuid.UUID, data ma
 		"id": current_userId,
 	})
 
-	_, err := userRepo.pool.Exec(ctx, sql, parameters...)
+	result, err := userRepo.pool.Exec(ctx, sql, parameters...)
 
-	if err != nil {
-		return fmt.Errorf(err.Error())
+	if result.RowsAffected() == 0 || err != nil {
+		return err
 	}
 
 	return nil
@@ -368,7 +368,7 @@ func (userRepo *UserRepository) GetAllUsers(current_userId *uuid.UUID, page stri
 	rows, err := userRepo.pool.Query(ctx, sql, parameters...)
 
 	if err != nil {
-		return []model.FetchUserModel{}, fmt.Errorf(err.Error())
+		return []model.FetchUserModel{}, err
 	}
 
 	defer rows.Close()
@@ -415,7 +415,7 @@ func (userRepo *UserRepository) GetUserById(current_userId *uuid.UUID, user_id u
 		&user.Age,
 		&user.Gender,
 	); err != nil {
-		return &model.FetchUserModel{}, fmt.Errorf(err.Error())
+		return &model.FetchUserModel{}, err
 	}
 
 	return &user, nil
@@ -439,7 +439,7 @@ func (userRepo *UserRepository) CreateUser(data *model.RegisterUserModel) (map[s
 		&username,
 		&email,
 	); err != nil {
-		return map[string]interface{}{}, fmt.Errorf(err.Error())
+		return map[string]interface{}{}, err
 	}
 
 	user := map[string]interface{}{
@@ -467,24 +467,24 @@ func (userRepo *UserRepository) GetUserByEmail(user_email string) (*model.FetchU
 		&user.Email,
 		&user.Password,
 	); err != nil {
-		return &model.FetchUserModel{}, fmt.Errorf(err.Error())
+		return &model.FetchUserModel{}, err
 	}
 
 	return user, nil
 }
 
-func (userRepo *UserRepository) DeleteMe(current_userId uuid.UUID) (string, error) {
+func (userRepo *UserRepository) DeleteMe(current_userId uuid.UUID) error {
 	ctx := context.Background()
 
 	sql := `
 		DELETE FROM users
 		WHERE id = $1
 	`
-	command, err := userRepo.pool.Exec(ctx, sql, current_userId)
+	result, err := userRepo.pool.Exec(ctx, sql, current_userId)
 
-	if err != nil {
-		return "", fmt.Errorf(err.Error())
+	if result.RowsAffected() == 0 || err != nil {
+		return err
 	}
-
-	return command.String(), nil
+	
+	return nil
 }
