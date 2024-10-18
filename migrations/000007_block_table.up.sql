@@ -5,3 +5,5 @@ CREATE TABLE IF NOT EXISTS blocking(
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ,
     FOREIGN KEY (blocking_id) REFERENCES users(id) ON DELETE CASCADE
 ) 
+
+

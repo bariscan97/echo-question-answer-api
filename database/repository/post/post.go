@@ -321,44 +321,26 @@ func (postRepo *PostRepository) DeletePostById(current_userId uuid.UUID, id uuid
 }
 
 func (postRepo *PostRepository) GetSinglePostById(current_userId *uuid.UUID, post_id uuid.UUID) (*model.FetchPostModel, error) {
+	
+	ctx := context.Background()
 
 	if current_userId != nil {
-		checkQuery := `
-			DO $$
-			DECLARE
-				post_user_id UUID;
-			BEGIN
-				SELECT user_id INTO post_user_id FROM posts WHERE id = ${value2}$;
-				IF EXISTS (
-					SELECT 1
-					FROM blocking
-					WHERE (user_id = '${value1}$' AND blocking_id = post_user_id) OR user_id = post_user_id AND blocking_id = '${value1}$'
-				) THEN
-					RAISE NOTICE 'user cannot access this post' ;
-				END IF;
-			END $$;`
-
-		checkQuery = strings.ReplaceAll(checkQuery, "${value1}$", current_userId.String())
-		checkQuery = strings.ReplaceAll(checkQuery, "${value2}$", post_id.String())
-
-		_, err := postRepo.pool.Exec(context.Background(), checkQuery)
-
+		
+		_, err := postRepo.pool.Exec(ctx, `SELECT check_user_blocked($1, $2)`, current_userId, post_id)
 		if err != nil {
-			return &model.FetchPostModel{}, err
+			return nil, err 
 		}
 	}
 
-	ctx := context.Background()
-
 	sql := `
-		SELECT p.id, p.parent_id, u.username, u.profile_img, p.title, p.content, p.like_count , p.created_at, p.updated_at FROM posts AS p
-		LEFT JOIN users AS u
-		ON u.id = p.user_id
+		SELECT p.id, p.parent_id, u.username, u.profile_img, p.title, p.content, p.like_count , p.created_at, p.updated_at 
+		FROM posts AS p
+		LEFT JOIN users AS u ON u.id = p.user_id
 		WHERE p.id = $1
 	`
 	var post model.FetchPostModel
 
-	err := postRepo.pool.QueryRow(ctx, sql, post_id).Scan(
+	err := postRepo.pool.QueryRow(context.Background(), sql, post_id).Scan(
 		&post.Id,
 		&post.Parent_id,
 		&post.Username,
