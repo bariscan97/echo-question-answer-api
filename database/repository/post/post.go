@@ -43,7 +43,7 @@ func (postRepo *PostRepository) GetCategories(page string) ([]map[string]interfa
 		ORDER BY post_count DESC
 		LIMIT 15 
         OFFSET $1 * 15
-	`
+		`
 	rows, err := postRepo.pool.Query(ctx, sql, page)
 
 	if err != nil {
