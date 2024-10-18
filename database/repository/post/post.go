@@ -4,7 +4,6 @@ import (
 	"articles-api/utils"
 	model "articles-api/models/post"
 	"context"
-	"fmt"
 	"strings"
 
 	"github.com/google/uuid"
@@ -48,7 +47,7 @@ func (postRepo *PostRepository) GetCategories(page string) ([]map[string]interfa
 	rows, err := postRepo.pool.Query(ctx, sql, page)
 
 	if err != nil {
-		return []map[string]interface{}{}, fmt.Errorf(err.Error())
+		return []map[string]interface{}{}, err
 	}
 
 	defer rows.Close()
@@ -66,7 +65,7 @@ func (postRepo *PostRepository) GetCategories(page string) ([]map[string]interfa
 			&category,
 			&post_count,
 		); err != nil {
-			return []map[string]interface{}{}, fmt.Errorf(err.Error())
+			return []map[string]interface{}{}, err
 		}
 
 		post := map[string]interface{}{
@@ -113,7 +112,7 @@ func (postRepo *PostRepository) LikePostById(current_userId uuid.UUID, post_id u
 	command, err := postRepo.pool.Exec(ctx, sql)
 
 	if err != nil {
-		return "", fmt.Errorf(err.Error())
+		return "", err
 	}
 
 	return command.String(), nil
@@ -161,7 +160,7 @@ func (postRepo *PostRepository) GetUserPostsById(current_userId *uuid.UUID, user
 	rows, err := postRepo.pool.Query(ctx, sql, parameters...)
 
 	if err != nil {
-		return []model.FetchPostModel{}, fmt.Errorf(err.Error())
+		return []model.FetchPostModel{}, err
 	}
 
 	defer rows.Close()
@@ -194,7 +193,7 @@ func (postRepo *PostRepository) CreateComment(current_userId uuid.UUID, parent_i
 	_, err := postRepo.pool.Exec(context.Background(), checkQuery)
 
 	if err != nil {
-		return &model.FetchPostModel{}, fmt.Errorf(err.Error())
+		return &model.FetchPostModel{}, err
 	}
 
 	ctx := context.Background()
@@ -207,7 +206,7 @@ func (postRepo *PostRepository) CreateComment(current_userId uuid.UUID, parent_i
 	err = postRepo.pool.QueryRow(ctx, sql, current_userId, parent_id, data.Title, data.Content).Scan(&post.Id, &post.Parent_id, &post.Title, &post.Content)
 
 	if err != nil {
-		return &post, fmt.Errorf(err.Error())
+		return &post, err
 	}
 
 	return &post, nil
@@ -225,7 +224,7 @@ func (postRepo *PostRepository) CreatePost(current_userId uuid.UUID, data *model
 	err := postRepo.pool.QueryRow(ctx, sql, current_userId, data.Title, data.Content).Scan(&post.Id, &post.Title, &post.Content)
 
 	if err != nil {
-		return &post, fmt.Errorf(err.Error())
+		return &post, err
 	}
 
 	return &post, nil
@@ -243,7 +242,7 @@ func (postRepo *PostRepository) UpdatePostById(current_userId uuid.UUID, post_id
 	_, err := postRepo.pool.Exec(ctx, sql, parameters...)
 
 	if err != nil {
-		return fmt.Errorf(err.Error())
+		return err
 	}
 
 	return nil
@@ -290,7 +289,7 @@ func (postRepo *PostRepository) GetPostCommentsById(current_userId *uuid.UUID, p
 	rows, err := postRepo.pool.Query(ctx, sql, parameters...)
 
 	if err != nil {
-		return []model.FetchPostModel{}, fmt.Errorf(err.Error())
+		return []model.FetchPostModel{}, err
 	}
 
 	defer rows.Close()
@@ -311,7 +310,7 @@ func (postRepo *PostRepository) DeletePostById(current_userId uuid.UUID, id uuid
 	_, err := postRepo.pool.Exec(ctx, sql, current_userId, id)
 
 	if err != nil {
-		return fmt.Errorf(err.Error())
+		return err
 	}
 
 	return nil
@@ -341,7 +340,7 @@ func (postRepo *PostRepository) GetSinglePostById(current_userId *uuid.UUID, pos
 		_, err := postRepo.pool.Exec(context.Background(), checkQuery)
 
 		if err != nil {
-			return &model.FetchPostModel{}, fmt.Errorf(err.Error())
+			return &model.FetchPostModel{}, err
 		}
 	}
 
@@ -368,7 +367,7 @@ func (postRepo *PostRepository) GetSinglePostById(current_userId *uuid.UUID, pos
 	)
 
 	if err != nil {
-		return &post, fmt.Errorf(err.Error())
+		return &post, err
 	}
 
 	return &post, nil
@@ -426,7 +425,7 @@ func (postRepo *PostRepository) GetAllPost(current_userId *uuid.UUID, page strin
 	rows, err := postRepo.pool.Query(ctx, sql, parameters...)
 
 	if err != nil {
-		return []model.FetchPostModel{}, fmt.Errorf(err.Error())
+		return []model.FetchPostModel{}, err
 	}
 
 	defer rows.Close()
