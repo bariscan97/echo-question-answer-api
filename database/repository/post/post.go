@@ -173,7 +173,7 @@ func (postRepo *PostRepository) GetUserPostsById(current_userId *uuid.UUID, user
 
 }
 func (postRepo *PostRepository) CreateComment(current_userId uuid.UUID, parent_id uuid.UUID, data *model.CreatePostModel) (*model.FetchPostModel, error) {
-
+	
 	checkAndInsertQuery := `
     WITH check_block AS (
         SELECT 
@@ -192,20 +192,24 @@ func (postRepo *PostRepository) CreateComment(current_userId uuid.UUID, parent_i
     RETURNING id, parent_id, title, content;
     `
 
+	ctx := context.Background()
+
 	var post model.FetchPostModel
 
-	if err := postRepo.pool.QueryRow(context.Background(),
-	 checkAndInsertQuery, 
-	 current_userId, parent_id, 
-	 data.Title, data.Content).
-	 Scan(&post.Id, 
-		&post.Parent_id, 
-		&post.Title, 
-		&post.Content,
-	); err != nil {
+	if err := postRepo.pool.QueryRow(ctx, 
+		checkAndInsertQuery, 
+		current_userId, parent_id, 
+		data.Title, data.Content,
+		).Scan(&post.Id,
+			&post.Parent_id, 
+		    &post.Title,
+			&post.Content,
+		); err != nil {
+		
 		if err == pgx.ErrNoRows {
 			return nil, fmt.Errorf("user cannot access this post") 
 		}
+	
 		return nil, err
 	}
 
