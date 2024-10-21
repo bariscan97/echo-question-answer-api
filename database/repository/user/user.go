@@ -485,6 +485,6 @@ func (userRepo *UserRepository) DeleteMe(current_userId uuid.UUID) error {
 	if result.RowsAffected() == 0 || err != nil {
 		return err
 	}
-	
+
 	return nil
 }

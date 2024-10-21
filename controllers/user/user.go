@@ -1,10 +1,10 @@
 package user
 
 import (
-	service "articles-api/services/user"
-	"articles-api/utils"
 	token_model "articles-api/models/token"
 	model "articles-api/models/user"
+	service "articles-api/services/user"
+	"articles-api/utils"
 	"net/http"
 	"os"
 	"strconv"

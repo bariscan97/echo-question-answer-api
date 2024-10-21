@@ -15,14 +15,14 @@ type IUserService interface {
 	CreateUser(data *model.RegisterUserModel) (map[string]interface{}, error)
 	GetUserByEmail(email string) (*model.FetchUserModel, error)
 	DeleteMe(current_userId uuid.UUID) error
-    GetAllUsers(current_userId *uuid.UUID, page string) ([]model.FetchUserModel, error)
-    GetUserById(current_userId *uuid.UUID, id uuid.UUID) (*model.FetchUserModel, error)
-    UpdateUserById(current_userId uuid.UUID, data map[string]interface{}) error
-    GetMyBlockList(current_userId uuid.UUID, page string) ([]map[string]interface{}, error)
-	GetUserFollowingListById(current_userId *uuid.UUID, id uuid.UUID, page string) ([]map[string]interface{}, error) 
+	GetAllUsers(current_userId *uuid.UUID, page string) ([]model.FetchUserModel, error)
+	GetUserById(current_userId *uuid.UUID, id uuid.UUID) (*model.FetchUserModel, error)
+	UpdateUserById(current_userId uuid.UUID, data map[string]interface{}) error
+	GetMyBlockList(current_userId uuid.UUID, page string) ([]map[string]interface{}, error)
+	GetUserFollowingListById(current_userId *uuid.UUID, id uuid.UUID, page string) ([]map[string]interface{}, error)
 	GetUserFollowersListById(current_userId *uuid.UUID, id uuid.UUID, page string) ([]map[string]interface{}, error)
 	FollowUserById(current_userId uuid.UUID, id uuid.UUID) (string, error)
-	BlockUserById(current_userId uuid.UUID, id uuid.UUID) (string , error)
+	BlockUserById(current_userId uuid.UUID, id uuid.UUID) (string, error)
 }
 
 func NewAuthService(userRepository user.IUserRepository) IUserService {
@@ -31,12 +31,12 @@ func NewAuthService(userRepository user.IUserRepository) IUserService {
 	}
 }
 
-func (userService *UserService) GetMyBlockList(current_userId uuid.UUID, page string) ([]map[string]interface{}, error)  {
+func (userService *UserService) GetMyBlockList(current_userId uuid.UUID, page string) ([]map[string]interface{}, error) {
 	return userService.UserRepository.GetMyBlockList(current_userId, page)
 }
 
-func (userService *UserService) GetUserFollowingListById(current_userId *uuid.UUID, id uuid.UUID, page string) ([]map[string]interface{}, error)  {
-	return userService.UserRepository.GetUserFollowingListById(current_userId, id ,page)
+func (userService *UserService) GetUserFollowingListById(current_userId *uuid.UUID, id uuid.UUID, page string) ([]map[string]interface{}, error) {
+	return userService.UserRepository.GetUserFollowingListById(current_userId, id, page)
 }
 
 func (userService *UserService) GetUserFollowersListById(current_userId *uuid.UUID, id uuid.UUID, page string) ([]map[string]interface{}, error) {
@@ -47,7 +47,7 @@ func (userService *UserService) FollowUserById(current_userId uuid.UUID, id uuid
 	return userService.UserRepository.FollowUserById(current_userId, id)
 }
 
-func (userService *UserService) BlockUserById(current_userId uuid.UUID, id uuid.UUID) (string , error) {
+func (userService *UserService) BlockUserById(current_userId uuid.UUID, id uuid.UUID) (string, error) {
 	return userService.UserRepository.BlockUserById(current_userId, id)
 }
 
@@ -68,7 +68,7 @@ func (userService *UserService) GetAllUsers(current_userId *uuid.UUID, page stri
 }
 
 func (userService *UserService) GetUserById(current_userId *uuid.UUID, id uuid.UUID) (*model.FetchUserModel, error) {
-	return userService.UserRepository.GetUserById(current_userId ,id)
+	return userService.UserRepository.GetUserById(current_userId, id)
 }
 
 func (userService *UserService) UpdateUserById(current_userId uuid.UUID, data map[string]interface{}) error {

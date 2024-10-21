@@ -9,7 +9,7 @@ import (
 )
 
 func GetPool() *pgxpool.Pool {
-	
+
 	connString := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
 		os.Getenv("DB_USER"),
 		os.Getenv("DB_PASSWORD"),
@@ -20,7 +20,7 @@ func GetPool() *pgxpool.Pool {
 	fmt.Println("connString: ", connString)
 
 	dbPool, err := pgxpool.Connect(context.Background(), connString)
-	
+
 	if err != nil {
 		panic(err)
 	}

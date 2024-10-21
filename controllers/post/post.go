@@ -1,10 +1,10 @@
 package post
 
 import (
-	service "articles-api/services/post"
-	"articles-api/utils"
 	posts_model "articles-api/models/post"
 	token_model "articles-api/models/token"
+	service "articles-api/services/post"
+	"articles-api/utils"
 	"net/http"
 	"strconv"
 	"unicode"

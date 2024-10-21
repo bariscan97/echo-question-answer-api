@@ -13,8 +13,8 @@ type PostService struct {
 
 type IPostService interface {
 	CreatePost(current_userId uuid.UUID, data *model.CreatePostModel) (*model.FetchPostModel, error)
-	CreateComment(current_userId uuid.UUID, parent_id uuid.UUID ,data *model.CreatePostModel) (*model.FetchPostModel, error)
-	UpdatePostById(current_id uuid.UUID, post_id uuid.UUID ,data map[string]interface{}) error
+	CreateComment(current_userId uuid.UUID, parent_id uuid.UUID, data *model.CreatePostModel) (*model.FetchPostModel, error)
+	UpdatePostById(current_id uuid.UUID, post_id uuid.UUID, data map[string]interface{}) error
 	GetPostCommentsById(current_userId *uuid.UUID, id uuid.UUID, page string) ([]model.FetchPostModel, error)
 	DeletePostById(current_id uuid.UUID, post_id uuid.UUID) error
 	GetPostById(current_userId *uuid.UUID, id uuid.UUID) (*model.FetchPostModel, error)
@@ -38,12 +38,12 @@ func (postService *PostService) CreatePost(current_userId uuid.UUID, data *model
 	return postService.PostRepository.CreatePost(current_userId, data)
 }
 
-func (postService *PostService) CreateComment(current_userId uuid.UUID, parent_id uuid.UUID ,data *model.CreatePostModel) (*model.FetchPostModel, error) {
-	return postService.PostRepository.CreateComment(current_userId, parent_id ,data)
+func (postService *PostService) CreateComment(current_userId uuid.UUID, parent_id uuid.UUID, data *model.CreatePostModel) (*model.FetchPostModel, error) {
+	return postService.PostRepository.CreateComment(current_userId, parent_id, data)
 }
 
-func (postService *PostService) UpdatePostById(current_id uuid.UUID, post_id uuid.UUID ,data map[string]interface{}) error {
-	return postService.PostRepository.UpdatePostById(current_id, post_id,  data)
+func (postService *PostService) UpdatePostById(current_id uuid.UUID, post_id uuid.UUID, data map[string]interface{}) error {
+	return postService.PostRepository.UpdatePostById(current_id, post_id, data)
 }
 
 func (postService *PostService) GetPostCommentsById(current_id *uuid.UUID, post_id uuid.UUID, page string) ([]model.FetchPostModel, error) {
@@ -55,7 +55,7 @@ func (postService *PostService) DeletePostById(current_id uuid.UUID, post_id uui
 }
 
 func (postService *PostService) GetPostById(current_userId *uuid.UUID, id uuid.UUID) (*model.FetchPostModel, error) {
-	return postService.PostRepository.GetSinglePostById(current_userId,id)
+	return postService.PostRepository.GetSinglePostById(current_userId, id)
 }
 
 func (postService *PostService) GetAllPost(current_userId *uuid.UUID, page string, category *string) ([]model.FetchPostModel, error) {

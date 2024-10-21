@@ -1,9 +1,9 @@
 package auth
 
 import (
+	model "articles-api/models/user"
 	service "articles-api/services/user"
 	"articles-api/utils"
-	model "articles-api/models/user"
 	"net/http"
 	"time"
 
